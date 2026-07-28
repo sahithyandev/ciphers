@@ -1,5 +1,6 @@
 CC = cc
 CFLAGS = -Wall -Wextra -std=c11 -Iinclude
+LLVM_PREFIX := $(if $(shell command -v xcrun 2>/dev/null),xcrun )
 
 SRC_DIR = src
 BIN_DIR = bin
@@ -29,9 +30,9 @@ test: $(TEST_BINS)
 coverage: CFLAGS += -fprofile-instr-generate -fcoverage-mapping
 coverage: clean $(TEST_BINS)
 	@for t in $(TEST_BINS); do LLVM_PROFILE_FILE=$$t.profraw ./$$t; done
-	@xcrun llvm-profdata merge -sparse $(BIN_DIR)/tests/*.profraw -o $(BIN_DIR)/tests/all.profdata
-	@xcrun llvm-cov report $(TEST_BINS) -instr-profile=$(BIN_DIR)/tests/all.profdata $(SRC_DIR)/
-	@echo "Detail: xcrun llvm-cov show <bin> -instr-profile=$(BIN_DIR)/tests/all.profdata"
+	@$(LLVM_PREFIX)llvm-profdata merge -sparse $(BIN_DIR)/tests/*.profraw -o $(BIN_DIR)/tests/all.profdata
+	@$(LLVM_PREFIX)llvm-cov report $(TEST_BINS) -instr-profile=$(BIN_DIR)/tests/all.profdata $(SRC_DIR)/
+	@echo "Detail: $(LLVM_PREFIX)llvm-cov show <bin> -instr-profile=$(BIN_DIR)/tests/all.profdata"
 
 clean:
 	rm -rf $(BIN_DIR)

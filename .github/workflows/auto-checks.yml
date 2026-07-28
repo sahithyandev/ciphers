@@ -1,0 +1,34 @@
+name: Automated Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check-docs-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify each cipher has a doc and a test file
+        run: |
+          status=0
+          for src in src/*.c; do
+            name=$(basename "$src" .c)
+            [ -f "docs/$name.md" ] || { echo "missing docs/$name.md"; status=1; }
+            [ -f "tests/$name.c" ] || { echo "missing tests/$name.c"; status=1; }
+          done
+          exit $status
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run tests
+        run: make test
+      - name: Check coverage >= 50%
+        run: |
+          make coverage | tee coverage.txt
+          grep -E '(%.*){4}' coverage.txt | awk '
+            { pct = $(NF-3); gsub("%", "", pct)
+              if (pct + 0 < 50) { print "FAIL:", $1, pct"% line coverage"; bad=1 }
+            }
+            END { exit bad+0 }'
