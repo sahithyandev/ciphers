@@ -15,7 +15,10 @@ $(BIN_DIR)/%: $(SRC_DIR)/%.c | $(BIN_DIR)
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
+test: all
+	@for t in tests/*.sh; do bash "$$t" || exit 1; done
+
 clean:
 	rm -rf $(BIN_DIR)
 
-.PHONY: all clean
+.PHONY: all clean test

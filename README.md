@@ -15,6 +15,7 @@ bin/       build output (gitignored)
 ```
 make        # builds every cipher in src/ into bin/
 make clean  # removes bin/
+make test   # builds, then runs tests/test.sh
 ```
 
 Each `src/<name>.c` becomes `bin/<name>` — no Makefile changes needed when adding a new cipher, just drop the file in `src/`.
