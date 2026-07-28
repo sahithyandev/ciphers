@@ -4,7 +4,14 @@
 #include <string.h>
 
 char shift_cipher(char c, int shift) {
-    char base = (c >= 'a' && c <= 'z') ? 'a' : 'A';
+    char base;
+    if (c >= 'a' && c <= 'z') {
+        base = 'a';
+    } else if (c >= 'A' && c <= 'Z') {
+        base = 'A';
+    } else {
+        return c;
+    }
     shift = ((shift % 26) + 26) % 26;
     return base + (c - base + shift) % 26;
 }
@@ -35,10 +42,7 @@ int cipher_main(int argc, char *argv[]) {
 
     for (int i = 0; message[i] != '\0'; i++) {
         char ch = message[i];
-        int is_alpha = (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
-        if (is_alpha) {
-            message[i] = cipher_function(ch, key);
-        }
+        message[i] = cipher_function(ch, key);
     }
     printf("%s\n", message);
 

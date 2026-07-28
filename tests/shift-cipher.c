@@ -19,6 +19,7 @@ int main(void) {
     CHECK(shift_cipher('a', -3) == 'x');           // negative shift
     CHECK(shift_cipher('a', 29) == 'd');            // shift > 26
     CHECK(shift_cipher('A', 1) == 'B');             // case preserved
+    CHECK(shift_cipher('{', 3) == '{');             // c >= 'a' but > 'z': falls to 'A' base
     CHECK(shift_decipher('d', 3) == 'a');
 
     for (int k = -30; k <= 30; k++) {
@@ -50,6 +51,11 @@ int main(void) {
         CHECK(run(2, argv) == 1);
     }
     {
+        // argc == 0: argi < argc is false, short-circuiting both flag checks
+        char *argv[] = {prog};
+        CHECK(run(0, argv) == 1);
+    }
+    {
         // too many args
         char msg[] = "hi";
         char extra[] = "there";
@@ -62,6 +68,15 @@ int main(void) {
         char msg[] = "hi";
         char *argv[] = {prog, bad, key3, msg};
         CHECK(run(4, argv) == 1);
+    }
+    {
+        // non-letter char above 'z' in ASCII: exercises the is_alpha
+        // short-circuit false branch that a plain space doesn't reach
+        char key1[] = "1";
+        char msg[] = "a{Z";
+        char *argv[] = {prog, key1, msg};
+        CHECK(run(3, argv) == 0);
+        CHECK(strcmp(msg, "b{A") == 0);
     }
     return TEST_SUMMARY();
 }
