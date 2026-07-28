@@ -18,3 +18,9 @@ make clean  # removes bin/
 ```
 
 Each `src/<name>.c` becomes `bin/<name>` — no Makefile changes needed when adding a new cipher, just drop the file in `src/`.
+
+## Ciphers
+
+| Cipher         | Docs                                         |
+| -------------- | -------------------------------------------- |
+| Shift (Caesar) | [docs/shift-cipher.md](docs/shift-cipher.md) |
