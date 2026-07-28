@@ -13,7 +13,7 @@ char shift_decipher(char c, int shift) {
     return shift_cipher(c, -shift);
 }
 
-int main(int argc, char *argv[]) {
+int cipher_main(int argc, char *argv[]) {
     int decrypt = 0;
     int opt;
     while ((opt = getopt(argc, argv, "d")) != -1) {
@@ -41,6 +41,12 @@ int main(int argc, char *argv[]) {
         }
     }
     printf("%s\n", message);
-    
+
     return 0;
 }
+
+#ifndef UNIT_TEST
+int main(int argc, char *argv[]) {
+    return cipher_main(argc, argv);
+}
+#endif
