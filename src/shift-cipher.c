@@ -8,20 +8,35 @@ char shift_cipher(char c, int shift) {
     return base + (c - base + shift) % 26;
 }
 
+char shift_decipher(char c, int shift) {
+    return shift_cipher(c, -shift);
+}
+
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Usage: %s <key> <message>\n", argv[0]);
+    int decrypt = 0;
+    int opt;
+    while ((opt = getopt(argc, argv, "d")) != -1) {
+        if (opt == 'd') decrypt = 1;
+        else {
+            fprintf(stderr, "Usage: %s [-d] <key> <message>\n", argv[0]);
+            return 1;
+        }
+    }
+
+    if (argc - optind != 2) {
+        fprintf(stderr, "Usage: %s [-d] <key> <message>\n", argv[0]);
         return 1;
     }
 
-    int key = atoi(argv[1]);
-    char *message = argv[2];
+    int key = atoi(argv[optind]);
+    char *message = argv[optind + 1];
+    char (*cipher_function)(char, int) = decrypt ? shift_decipher : shift_cipher;
 
     for (int i = 0; message[i] != '\0'; i++) {
         char ch = message[i];
         int is_alpha = (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
         if (is_alpha) {
-            message[i] = shift_cipher(ch, key);
+            message[i] = cipher_function(ch, key);
         }
     }
     printf("%s\n", message);
