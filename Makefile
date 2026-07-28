@@ -24,8 +24,19 @@ $(BIN_DIR)/tests/%: $(TEST_DIR)/%.c $(SRC_DIR)/%.c | $(BIN_DIR)/tests
 $(BIN_DIR) $(BIN_DIR)/tests:
 	mkdir -p $@
 
+GREEN = \033[32m
+RED = \033[31m
+RESET = \033[0m
+
 test: $(TEST_BINS)
-	@for t in $(TEST_BINS); do ./$$t || exit 1; done
+	@pass=0; total=0; \
+	for t in $(TEST_BINS); do \
+		total=$$((total+1)); \
+		if ./$$t; then echo "$(GREEN)PASS$(RESET) $$t"; pass=$$((pass+1)); \
+		else echo "$(RED)FAIL$(RESET) $$t"; fi; \
+	done; \
+	echo "$$pass/$$total passed"; \
+	[ $$pass -eq $$total ]
 
 coverage: CFLAGS += -fprofile-instr-generate -fcoverage-mapping
 coverage: clean $(TEST_BINS)

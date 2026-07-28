@@ -2,9 +2,9 @@
 // The source is included directly (compiled with -DUNIT_TEST, which omits
 // its main() so this file's main() is the only one), giving access to both
 // the pure functions and the CLI entry point (cipher_main) in one binary.
-#include <assert.h>
 #include <string.h>
 #include <unistd.h>
+#include "test.h"
 #include "../src/shift-cipher.c"
 
 // getopt's parser state persists across calls; reset before each cipher_main
@@ -16,17 +16,19 @@ static int run(int argc, char *argv[]) {
 }
 
 int main(void) {
+    TEST_INIT(); // silence cipher_main's own stdout/stderr output
+
     // shift_cipher / shift_decipher
-    assert(shift_cipher('a', 3) == 'd');
-    assert(shift_cipher('x', 3) == 'a');           // wrap forward
-    assert(shift_cipher('a', -3) == 'x');           // negative shift
-    assert(shift_cipher('a', 29) == 'd');            // shift > 26
-    assert(shift_cipher('A', 1) == 'B');             // case preserved
-    assert(shift_decipher('d', 3) == 'a');
+    CHECK(shift_cipher('a', 3) == 'd');
+    CHECK(shift_cipher('x', 3) == 'a');           // wrap forward
+    CHECK(shift_cipher('a', -3) == 'x');           // negative shift
+    CHECK(shift_cipher('a', 29) == 'd');            // shift > 26
+    CHECK(shift_cipher('A', 1) == 'B');             // case preserved
+    CHECK(shift_decipher('d', 3) == 'a');
 
     for (int k = -30; k <= 30; k++) {
         for (char c = 'a'; c <= 'z'; c++) {
-            assert(shift_decipher(shift_cipher(c, k), k) == c);
+            CHECK(shift_decipher(shift_cipher(c, k), k) == c);
         }
     }
 
@@ -38,33 +40,33 @@ int main(void) {
 
     {
         char *argv[] = {prog, key3, msgEnc};
-        assert(run(3, argv) == 0);
-        assert(strcmp(msgEnc, "Dwwdfn dw gdzq") == 0);
+        CHECK(run(3, argv) == 0);
+        CHECK(strcmp(msgEnc, "Dwwdfn dw gdzq") == 0);
     }
     {
         char dflag[] = "-d";
         char *argv[] = {prog, dflag, key3, msgDec};
-        assert(run(4, argv) == 0);
-        assert(strcmp(msgDec, "Attack at dawn") == 0);
+        CHECK(run(4, argv) == 0);
+        CHECK(strcmp(msgDec, "Attack at dawn") == 0);
     }
     {
         // too few args
         char *argv[] = {prog, key3};
-        assert(run(2, argv) == 1);
+        CHECK(run(2, argv) == 1);
     }
     {
         // too many args
         char msg[] = "hi";
         char extra[] = "there";
         char *argv[] = {prog, key3, msg, extra};
-        assert(run(4, argv) == 1);
+        CHECK(run(4, argv) == 1);
     }
     {
         // unknown flag
         char bad[] = "-z";
         char msg[] = "hi";
         char *argv[] = {prog, bad, key3, msg};
-        assert(run(4, argv) == 1);
+        CHECK(run(4, argv) == 1);
     }
-    return 0;
+    return TEST_SUMMARY();
 }
