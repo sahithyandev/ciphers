@@ -3,15 +3,10 @@
 // its main() so this file's main() is the only one), giving access to both
 // the pure functions and the CLI entry point (cipher_main) in one binary.
 #include <string.h>
-#include <unistd.h>
 #include "test.h"
 #include "../src/shift-cipher.c"
 
-// getopt's parser state persists across calls; reset before each cipher_main
-// invocation (BSD/Darwin getopt uses optreset for this).
 static int run(int argc, char *argv[]) {
-    optreset = 1;
-    optind = 1;
     return cipher_main(argc, argv);
 }
 

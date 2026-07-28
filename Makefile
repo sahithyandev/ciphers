@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -Wall -Wextra -std=c11 -Iinclude
+CFLAGS = -Wall -Wextra -std=c11 -D_POSIX_C_SOURCE=200809L -Iinclude
 LLVM_PREFIX := $(if $(shell command -v xcrun 2>/dev/null),xcrun )
 
 SRC_DIR = src

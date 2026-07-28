@@ -1,7 +1,7 @@
 // Docs: docs/shift-cipher.md
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string.h>
 
 char shift_cipher(char c, int shift) {
     char base = (c >= 'a' && c <= 'z') ? 'a' : 'A';
@@ -15,22 +15,22 @@ char shift_decipher(char c, int shift) {
 
 int cipher_main(int argc, char *argv[]) {
     int decrypt = 0;
-    int opt;
-    while ((opt = getopt(argc, argv, "d")) != -1) {
-        if (opt == 'd') decrypt = 1;
-        else {
-            fprintf(stderr, "Usage: %s [-d] <key> <message>\n", argv[0]);
-            return 1;
-        }
-    }
-
-    if (argc - optind != 2) {
+    int argi = 1;
+    if (argi < argc && strcmp(argv[argi], "-d") == 0) {
+        decrypt = 1;
+        argi++;
+    } else if (argi < argc && argv[argi][0] == '-') {
         fprintf(stderr, "Usage: %s [-d] <key> <message>\n", argv[0]);
         return 1;
     }
 
-    int key = atoi(argv[optind]);
-    char *message = argv[optind + 1];
+    if (argc - argi != 2) {
+        fprintf(stderr, "Usage: %s [-d] <key> <message>\n", argv[0]);
+        return 1;
+    }
+
+    int key = atoi(argv[argi]);
+    char *message = argv[argi + 1];
     char (*cipher_function)(char, int) = decrypt ? shift_decipher : shift_cipher;
 
     for (int i = 0; message[i] != '\0'; i++) {
