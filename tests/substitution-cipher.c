@@ -2,6 +2,7 @@
 // The source is included directly (compiled with -DUNIT_TEST, which omits
 // its main() so this file's main() is the only one), giving access to both
 // the pure functions and the CLI entry point (cipher_main) in one binary.
+#include <ctype.h>
 #include <string.h>
 #include "test.h"
 #include "../src/substitution-cipher.c"

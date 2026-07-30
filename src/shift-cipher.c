@@ -1,16 +1,31 @@
 // Docs: docs/shift-cipher.md
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../utils/cli.c"
 
 char shift_cipher(char c, int shift) {
-    if (!isalpha((unsigned char)c)) {
+    char base;
+    if (c >= 'a' && c <= 'z') {
+        base = 'a';
+    } else if (c >= 'A' && c <= 'Z') {
+        base = 'A';
+    } else {
         return c;
     }
-    char base = isupper((unsigned char)c) ? 'A' : 'a';
-    shift = ((shift % 26) + 26) % 26;
-    return base + (c - base + shift) % 26;
+
+    // Normalize shift into [0, 26): one mod for the common case, plus a
+    // conditional fix-up for negative shifts instead of the ((x % n) + n) % n
+    // double-mod idiom.
+    shift %= 26;
+    if (shift < 0) {
+        shift += 26;
+    }
+
+    int offset = c - base + shift;
+    if (offset >= 26) {
+        offset -= 26;
+    }
+    return (char)(base + offset);
 }
 
 char shift_decipher(char c, int shift) {
@@ -24,11 +39,15 @@ int cipher_main(int argc, char *argv[]) {
         return 1;
     }
 
-    int key = atoi(key_str);
+    // Fold the decrypt flag into the shift once, up front, so the loop body
+    // below is a single shift_cipher call per character.
+    int shift = atoi(key_str);
+    if (decrypt) {
+        shift = -shift;
+    }
 
     for (int i = 0; message[i] != '\0'; i++) {
-        char ch = message[i];
-        message[i] = decrypt ? shift_decipher(ch, key) : shift_cipher(ch, key);
+        message[i] = shift_cipher(message[i], shift);
     }
     printf("%s\n", message);
 
