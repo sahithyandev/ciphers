@@ -1,16 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../utils/strings.c"
 
 const char *alphabet = "abcdefghijklmnopqrstuvwxyz";
-
-char to_lower(char c) {
-    return (c >= 'A' && c <= 'Z') ? c - 'A' + 'a' : c;
-}
-
-char to_upper(char c) {
-    return (c >= 'a' && c <= 'z') ? c - 'a' + 'A' : c;
-}
 
 /*
  * Parses the key string and fills in any missing characters in place.
