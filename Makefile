@@ -52,4 +52,19 @@ coverage: clean $(TEST_BINS)
 clean:
 	rm -rf $(BIN_DIR)
 
-.PHONY: all clean test coverage
+DOCS_DIR = docs
+
+new:
+ifndef NAME
+	$(error Usage: make new NAME=<cipher-name>)
+endif
+	@for f in $(SRC_DIR)/$(NAME).c $(DOCS_DIR)/$(NAME).md $(TEST_DIR)/$(NAME).c; do \
+		if [ -e $$f ]; then echo "$$f already exists"; exit 1; fi; \
+	done
+	@title=$$(echo $(NAME) | awk -F- '{for(i=1;i<=NF;i++)$$i=toupper(substr($$i,1,1)) substr($$i,2); print}' OFS=' '); \
+	printf '// Docs: docs/$(NAME).md\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint cipher_main(int argc, char *argv[]) {\n    int decrypt = 0;\n    int argi = 1;\n    if (argi < argc && strcmp(argv[argi], "-d") == 0) {\n        decrypt = 1;\n        argi++;\n    }\n    (void)decrypt;\n\n    if (argc - argi != 1) {\n        fprintf(stderr, "Usage: %%s [-d] <message>\\n", argv[0]);\n        return 1;\n    }\n\n    char *message = argv[argi];\n    printf("%%s\\n", message);\n\n    return 0;\n}\n\n#ifndef UNIT_TEST\nint main(int argc, char *argv[]) {\n    return cipher_main(argc, argv);\n}\n#endif\n' > $(SRC_DIR)/$(NAME).c; \
+	printf '# %s\n\nTODO: describe the cipher.\n\nSource: [`src/$(NAME).c`](../src/$(NAME).c)\n\n## Usage\n\n```\nbin/$(NAME) [-d] <args...>\n```\n\n## Examples\n\n```\n$$ bin/$(NAME) ...\n```\n\n## Weaknesses\n\nTODO.\n' "$$title" > $(DOCS_DIR)/$(NAME).md; \
+	printf '// Unit + CLI tests for src/$(NAME).c, run via `make test`.\n#include <string.h>\n#include "test.h"\n#include "../src/$(NAME).c"\n\nstatic int run(int argc, char *argv[]) {\n    return cipher_main(argc, argv);\n}\n\nint main(void) {\n    TEST_INIT();\n\n    // TODO: add tests\n\n    return TEST_SUMMARY();\n}\n' > $(TEST_DIR)/$(NAME).c; \
+	echo "created $(SRC_DIR)/$(NAME).c $(DOCS_DIR)/$(NAME).md $(TEST_DIR)/$(NAME).c"
+
+.PHONY: all clean test coverage new
