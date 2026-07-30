@@ -13,25 +13,45 @@ static int run(int argc, char *argv[]) {
 int main(void) {
     TEST_INIT(); // silence cipher_main's own stdout/stderr output
 
-    // parse_key: fills in missing letters in alphabetical order, keeping
-    // the caller-supplied prefix. Buffers must be sized for the full
-    // 26-letter alphabet plus the terminator.
+    // parse_key: sanitizes raw (lowercases, drops non-letters, keeps only
+    // the first occurrence of each letter) then fills in the remaining
+    // letters of the alphabet in order.
     {
-        char key[27] = "zebra";
-        parse_key(key);
-        CHECK(strcmp(key, "zebracdfghijklmnopqstuvwxy") == 0);
+        char out[27];
+        parse_key("zebra", out);
+        CHECK(strcmp(out, "zebracdfghijklmnopqstuvwxy") == 0);
     }
     {
-        // empty key: falls back to the alphabet in its natural order
-        char key[27] = "";
-        parse_key(key);
-        CHECK(strcmp(key, alphabet) == 0);
+        // empty raw: falls back to the alphabet in its natural order
+        char out[27];
+        parse_key("", out);
+        CHECK(strcmp(out, alphabet) == 0);
     }
     {
         // already-complete key: nothing left to append
-        char key[27] = "bacdefghijklmnopqrstuvwxyz";
-        parse_key(key);
-        CHECK(strcmp(key, "bacdefghijklmnopqrstuvwxyz") == 0);
+        char out[27];
+        parse_key("bacdefghijklmnopqrstuvwxyz", out);
+        CHECK(strcmp(out, "bacdefghijklmnopqrstuvwxyz") == 0);
+    }
+    {
+        // mixed case, duplicates, and non-letters are sanitized before
+        // the remaining letters get filled in
+        char out[27];
+        parse_key("zEbra!!zz", out);
+        CHECK(strcmp(out, "zebracdfghijklmnopqstuvwxy") == 0);
+    }
+    {
+        // '{' sits just above 'z' in ASCII: exercises the ch > 'z' branch,
+        // which digits/punctuation below 'a' never reach
+        char out[27];
+        parse_key("z{ebra", out);
+        CHECK(strcmp(out, "zebracdfghijklmnopqstuvwxy") == 0);
+    }
+    {
+        // every letter duplicated: dedupes down to the plain alphabet
+        char out[27];
+        parse_key("aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz", out);
+        CHECK(strcmp(out, alphabet) == 0);
     }
 
     // substitute_cipher / substitute_decipher, using the full key that
@@ -104,11 +124,14 @@ int main(void) {
         CHECK(run(4, argv) == 1);
     }
     {
-        // key longer than the alphabet is rejected
-        char key[] = "abcdefghijklmnopqrstuvwxyzz"; // 27 chars
+        // raw key longer than the alphabet, with a duplicate letter and
+        // non-letter characters: parse_key trims it down to a valid
+        // 26-letter key instead of overflowing or being rejected
+        char key[] = "abcdefghijklmnopqrstuvwxyz3z!"; // 29 chars, dupes 'z'
         char msg[] = "hi";
         char *argv[] = {prog, key, msg};
-        CHECK(run(3, argv) == 1);
+        CHECK(run(3, argv) == 0);
+        CHECK(strcmp(msg, "hi") == 0); // sanitized key == identity alphabet
     }
     {
         // non-letter char above 'z' in ASCII passes through untouched

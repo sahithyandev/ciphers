@@ -3,23 +3,36 @@
 #include <string.h>
 #include "../utils/strings.c"
 
-const char *alphabet = "abcdefghijklmnopqrstuvwxyz";
+#define ALPHABETS "abcdefghijklmnopqrstuvwxyz"
+#define ALPHABET_LEN (sizeof(ALPHABETS) - 1)
+
+const char *alphabet = ALPHABETS;
 
 /*
- * Parses the key string and fills in any missing characters in place.
- * zebra -> zebracdfghijklmnopqstuvwxy
+ * Builds a full 26-letter substitution key in out (a 27-byte buffer) from
+ * raw: keeps raw's letters (lowercased, deduped, non-letters dropped) as a
+ * prefix, then fills in the remaining letters of the alphabet in order.
+ * zEbra!!zz -> zebracdfghijklmnopqstuvwxy
  */
-void parse_key(char* key) {
-    size_t alphabet_size = strlen(alphabet);
-    size_t i = 0;
-
-    while (i < alphabet_size) {
-        char ch = alphabet[i];
-        if (strchr(key, ch) == NULL) {
-            char suffix[2] = {ch, '\0'};
-            strcat(key, suffix);
+void parse_key(const char *raw, char *out) {
+    size_t len = 0;
+    out[0] = '\0';
+    for (size_t i = 0; raw[i] != '\0'; i++) {
+        char ch = to_lower(raw[i]);
+        if (ch < 'a' || ch > 'z' || strchr(out, ch) != NULL) {
+            continue;
         }
-        i++;
+        out[len++] = ch;
+        out[len] = '\0';
+    }
+
+    for (size_t i = 0; i < strlen(alphabet); i++) {
+        char ch = alphabet[i];
+        if (strchr(out, ch) == NULL) {
+            size_t out_len = strlen(out);
+            out[out_len] = ch;
+            out[out_len + 1] = '\0';
+        }
     }
 }
 
@@ -63,13 +76,8 @@ int cipher_main(int argc, char *argv[]) {
         return 1;
     }
     
-    if (strlen(argv[argi]) > 26) {
-        fprintf(stderr, "Key must be at most 26 characters\n");
-        return 1;
-    }
-    char key[27];
-    strcpy(key, argv[argi]);
-    parse_key(key);
+    char key[ALPHABET_LEN + 1];
+    parse_key(argv[argi], key);
     char *message = argv[argi + 1];
     char (*cipher_function)(char, char*) = decrypt ? substitute_decipher : substitute_cipher;
 
