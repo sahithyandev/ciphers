@@ -6,6 +6,7 @@ Cipher implementations in C, one program per cipher.
 
 ```
 src/       one .c file per cipher, each with its own main()
+utils/     shared helper .c files, #include'd directly by ciphers that need them
 include/   shared headers, if any
 bin/       build output (gitignored)
 ```
