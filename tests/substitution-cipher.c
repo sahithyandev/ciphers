@@ -71,7 +71,7 @@ int main(void) {
 
         for (char c = 'a'; c <= 'z'; c++) {
             CHECK(substitute_decipher(substitute_cipher(c, key), key) == c);
-            char C = to_upper(c);
+            char C = toupper((unsigned char)c);
             CHECK(substitute_decipher(substitute_cipher(C, key), key) == C);
         }
     }

@@ -1,17 +1,14 @@
 // Docs: docs/shift-cipher.md
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include "../utils/cli.c"
 
 char shift_cipher(char c, int shift) {
-    char base;
-    if (c >= 'a' && c <= 'z') {
-        base = 'a';
-    } else if (c >= 'A' && c <= 'Z') {
-        base = 'A';
-    } else {
+    if (!isalpha((unsigned char)c)) {
         return c;
     }
+    char base = isupper((unsigned char)c) ? 'A' : 'a';
     shift = ((shift % 26) + 26) % 26;
     return base + (c - base + shift) % 26;
 }
@@ -21,28 +18,17 @@ char shift_decipher(char c, int shift) {
 }
 
 int cipher_main(int argc, char *argv[]) {
-    int decrypt = 0;
-    int argi = 1;
-    if (argi < argc && strcmp(argv[argi], "-d") == 0) {
-        decrypt = 1;
-        argi++;
-    } else if (argi < argc && argv[argi][0] == '-') {
-        fprintf(stderr, "Usage: %s [-d] <key> <message>\n", argv[0]);
+    int decrypt;
+    char *key_str, *message;
+    if (parse_args(argc, argv, &decrypt, &key_str, &message) != 0) {
         return 1;
     }
 
-    if (argc - argi != 2) {
-        fprintf(stderr, "Usage: %s [-d] <key> <message>\n", argv[0]);
-        return 1;
-    }
-
-    int key = atoi(argv[argi]);
-    char *message = argv[argi + 1];
-    char (*cipher_function)(char, int) = decrypt ? shift_decipher : shift_cipher;
+    int key = atoi(key_str);
 
     for (int i = 0; message[i] != '\0'; i++) {
         char ch = message[i];
-        message[i] = cipher_function(ch, key);
+        message[i] = decrypt ? shift_decipher(ch, key) : shift_cipher(ch, key);
     }
     printf("%s\n", message);
 
