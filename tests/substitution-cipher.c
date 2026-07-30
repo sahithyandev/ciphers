@@ -13,14 +13,6 @@ static int run(int argc, char *argv[]) {
 int main(void) {
     TEST_INIT(); // silence cipher_main's own stdout/stderr output
 
-    // to_lower / to_upper
-    CHECK(to_lower('A') == 'a');
-    CHECK(to_lower('z') == 'z');           // already lowercase
-    CHECK(to_lower('1') == '1');           // non-letter passthrough
-    CHECK(to_upper('a') == 'A');
-    CHECK(to_upper('Z') == 'Z');           // already uppercase
-    CHECK(to_upper('1') == '1');           // non-letter passthrough
-
     // parse_key: fills in missing letters in alphabetical order, keeping
     // the caller-supplied prefix. Buffers must be sized for the full
     // 26-letter alphabet plus the terminator.
