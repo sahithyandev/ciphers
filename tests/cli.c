@@ -55,5 +55,44 @@ int main(void) {
         CHECK(parse_args(0, argv, &decrypt, &k, &m) == 1);
     }
 
+    // parse_args_no_key: same flag handling, but a single positional arg
+    {
+        char prog[] = "prog", msg[] = "hi";
+        char *argv[] = {prog, msg};
+        int decrypt; char *m;
+        CHECK(parse_args_no_key(2, argv, &decrypt, &m) == 0);
+        CHECK(decrypt == 0);
+        CHECK(strcmp(m, "hi") == 0);
+    }
+    {
+        char prog[] = "prog", dflag[] = "-d", msg[] = "hi";
+        char *argv[] = {prog, dflag, msg};
+        int decrypt; char *m;
+        CHECK(parse_args_no_key(3, argv, &decrypt, &m) == 0);
+        CHECK(decrypt == 1);
+        CHECK(strcmp(m, "hi") == 0);
+    }
+    {
+        // unknown flag
+        char prog[] = "prog", bad[] = "-z", msg[] = "hi";
+        char *argv[] = {prog, bad, msg};
+        int decrypt; char *m;
+        CHECK(parse_args_no_key(3, argv, &decrypt, &m) == 1);
+    }
+    {
+        // too many args
+        char prog[] = "prog", msg[] = "hi", extra[] = "there";
+        char *argv[] = {prog, msg, extra};
+        int decrypt; char *m;
+        CHECK(parse_args_no_key(3, argv, &decrypt, &m) == 1);
+    }
+    {
+        // too few args
+        char prog[] = "prog";
+        char *argv[] = {prog};
+        int decrypt; char *m;
+        CHECK(parse_args_no_key(1, argv, &decrypt, &m) == 1);
+    }
+
     return TEST_SUMMARY();
 }
