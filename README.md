@@ -28,9 +28,11 @@ Tests live in `tests/<name>.c`, one per cipher, and `#include` the matching
 
 ## Ciphers
 
-| Cipher         | Docs                                         |
-| -------------- | -------------------------------------------- |
-| Shift (Caesar) | [docs/shift-cipher.md](docs/shift-cipher.md) |
+| Cipher         | Docs                                                       |
+| -------------- | ---------------------------------------------------------- |
+| Shift (Caesar) | [docs/shift-cipher.md](docs/shift-cipher.md)               |
+| Atbash         | [docs/atbash-cipher.md](docs/atbash-cipher.md)             |
+| Substitution   | [docs/substitution-cipher.md](docs/substitution-cipher.md) |
 
 ## Adding a new cipher
 
