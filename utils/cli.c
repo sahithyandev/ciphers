@@ -43,3 +43,28 @@ int parse_args_no_key(int argc, char *argv[], int *decrypt, char **message) {
     *message = argv[argi];
     return 0;
 }
+
+// Parses "[-d] <key> <message>", runs fn on the message in place, prints it.
+// This is the entire non-core body of a keyed cipher's main().
+int run_cipher(int argc, char *argv[], void (*fn)(char *, const char *, int)) {
+    int decrypt;
+    char *key, *message;
+    if (parse_args(argc, argv, &decrypt, &key, &message) != 0) {
+        return 1;
+    }
+    fn(message, key, decrypt);
+    printf("%s\n", message);
+    return 0;
+}
+
+// Same as run_cipher, but for ciphers that take no key (e.g. Atbash).
+int run_keyless_cipher(int argc, char *argv[], void (*fn)(char *, int)) {
+    int decrypt;
+    char *message;
+    if (parse_args_no_key(argc, argv, &decrypt, &message) != 0) {
+        return 1;
+    }
+    fn(message, decrypt);
+    printf("%s\n", message);
+    return 0;
+}

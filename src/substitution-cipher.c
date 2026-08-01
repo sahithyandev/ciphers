@@ -1,10 +1,9 @@
+// Docs: docs/substitution-cipher.md
 #include <stdio.h>
 #include "../utils/cli.c"
 
 #define ALPHABETS "abcdefghijklmnopqrstuvwxyz"
 #define ALPHABET_LEN (sizeof(ALPHABETS) - 1)
-
-const char *alphabet = ALPHABETS;
 
 /*
  * Builds a full 26-letter substitution key in out (a 27-byte buffer) from
@@ -31,7 +30,7 @@ void parse_key(const char *raw, char *out) {
 
     for (size_t i = 0; i < ALPHABET_LEN; i++) {
         if (!seen[i]) {
-            out[len++] = alphabet[i];
+            out[len++] = ALPHABETS[i];
         }
     }
     out[len] = '\0';
@@ -49,35 +48,14 @@ static char map_char(char c, const char *map) {
     return c;
 }
 
-char substitute_cipher(char c, char *key) {
-    return map_char(c, key);
-}
-
-char substitute_decipher(char c, char *key) {
-    // Invert key (key[i] maps 'a'+i -> key[i]) so a plain forward map_char
-    // can be reused instead of a second search-based code path.
-    char inverse[ALPHABET_LEN + 1];
-    for (size_t i = 0; i < ALPHABET_LEN; i++) {
-        inverse[key[i] - 'a'] = (char)('a' + i);
-    }
-    inverse[ALPHABET_LEN] = '\0';
-    return map_char(c, inverse);
-}
-
-int cipher_main(int argc, char *argv[]) {
-    int decrypt;
-    char *key_str, *message;
-    if (parse_args(argc, argv, &decrypt, &key_str, &message) != 0) {
-        return 1;
-    }
-
+void substitution_cipher(char *message, const char *key_str, int decrypt) {
     char key[ALPHABET_LEN + 1];
     parse_key(key_str, key);
 
     // Build the map once up front (inverted for decryption) so the message
     // loop below is a single map_char call per character.
-    char inverse[ALPHABET_LEN + 1];
     const char *map = key;
+    char inverse[ALPHABET_LEN + 1];
     if (decrypt) {
         for (size_t i = 0; i < ALPHABET_LEN; i++) {
             inverse[key[i] - 'a'] = (char)('a' + i);
@@ -89,13 +67,10 @@ int cipher_main(int argc, char *argv[]) {
     for (int i = 0; message[i] != '\0'; i++) {
         message[i] = map_char(message[i], map);
     }
-    printf("%s\n", message);
-
-    return 0;
 }
 
 #ifndef UNIT_TEST
 int main(int argc, char *argv[]) {
-    return cipher_main(argc, argv);
+    return run_cipher(argc, argv, substitution_cipher);
 }
 #endif

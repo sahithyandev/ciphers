@@ -62,9 +62,10 @@ endif
 		if [ -e $$f ]; then echo "$$f already exists"; exit 1; fi; \
 	done
 	@title=$$(echo $(NAME) | awk -F- '{for(i=1;i<=NF;i++)$$i=toupper(substr($$i,1,1)) substr($$i,2); print}' OFS=' '); \
-	printf '// Docs: docs/$(NAME)-cipher.md\n#include <stdio.h>\n#include "../utils/cli.c"\n\nint cipher_main(int argc, char *argv[]) {\n    int decrypt;\n    char *message;\n    if (parse_args_no_key(argc, argv, &decrypt, &message) != 0) {\n        return 1;\n    }\n    (void)decrypt;\n\n    printf("%%s\\n", message);\n\n    return 0;\n}\n\n#ifndef UNIT_TEST\nint main(int argc, char *argv[]) {\n    return cipher_main(argc, argv);\n}\n#endif\n' > $(SRC_DIR)/$(NAME)-cipher.c; \
+	fn=$$(echo $(NAME) | tr - _)_cipher; \
+	printf '// Docs: docs/$(NAME)-cipher.md\n#include "../utils/cli.c"\n\n// The whole cipher: transform message in place. Delete the (void)decrypt\n// and take a "const char *key" param too if this cipher needs one.\nvoid %s(char *message, int decrypt) {\n    (void)message;\n    (void)decrypt;\n}\n\n#ifndef UNIT_TEST\nint main(int argc, char *argv[]) {\n    return run_keyless_cipher(argc, argv, %s);\n}\n#endif\n' "$$fn" "$$fn" > $(SRC_DIR)/$(NAME)-cipher.c; \
 	printf '# %s\n\nTODO: describe the cipher.\n\nSource: [`src/$(NAME)-cipher.c`](../src/$(NAME)-cipher.c)\n\n## Usage\n\n```\nbin/$(NAME)-cipher [-d] <args...>\n```\n\n## Examples\n\n```\n$$ bin/$(NAME)-cipher ...\n```\n\n## Weaknesses\n\nTODO.\n' "$$title" > $(DOCS_DIR)/$(NAME)-cipher.md; \
-	printf '// Unit + CLI tests for src/$(NAME)-cipher.c, run via `make test`.\n#include <string.h>\n#include "test.h"\n#include "../src/$(NAME)-cipher.c"\n\nstatic int run(int argc, char *argv[]) {\n    return cipher_main(argc, argv);\n}\n\nint main(void) {\n    TEST_INIT();\n\n    // TODO: add tests\n\n    return TEST_SUMMARY();\n}\n' > $(TEST_DIR)/$(NAME)-cipher.c; \
+	printf '// Tests for src/$(NAME)-cipher.c, run via `make test`.\n#include <string.h>\n#include "test.h"\n#include "../src/$(NAME)-cipher.c"\n\nint main(void) {\n    TEST_INIT();\n\n    // TODO: add tests, e.g.:\n    // char msg[] = "...";\n    // %s(msg, 0);\n    // CHECK(strcmp(msg, "...") == 0);\n\n    return TEST_SUMMARY();\n}\n' "$$fn" > $(TEST_DIR)/$(NAME)-cipher.c; \
 	echo "created $(SRC_DIR)/$(NAME)-cipher.c $(DOCS_DIR)/$(NAME)-cipher.md $(TEST_DIR)/$(NAME)-cipher.c"
 
 .PHONY: all clean test coverage new
