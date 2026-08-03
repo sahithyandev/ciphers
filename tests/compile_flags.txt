@@ -1,3 +1,4 @@
 -std=c11
 -Iinclude
 -DNO_MAIN
+-DNO_ATTACK_MAIN

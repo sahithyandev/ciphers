@@ -12,7 +12,7 @@ jobs:
       - name: Verify each cipher has a doc and a test file
         run: |
           status=0
-          for src in src/*.c; do
+          for src in src/*.c attacks/*.c; do
             name=$(basename "$src" .c)
             [ -f "docs/$name.md" ] || { echo "missing docs/$name.md"; status=1; }
             [ -f "tests/$name.c" ] || { echo "missing tests/$name.c"; status=1; }
