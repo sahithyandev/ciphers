@@ -6,6 +6,7 @@ Cipher implementations in C, one program per cipher.
 
 ```
 src/       one .c file per cipher, each with its own main()
+attacks/   one .c file per cryptanalysis attack, each with its own main()
 utils/     shared helper .c files, #include'd directly by ciphers that need them
 include/   shared headers, if any
 bin/       build output (gitignored)
@@ -32,7 +33,7 @@ Each `src/<name>.c` becomes `bin/<name>` — no Makefile changes needed when add
 Tests live in `tests/<name>.c`, one per cipher, and `#include` the matching
 `src/<name>.c` directly so they can call its cipher function without a header
 split. `main` itself is untested (and untestable-by-design): it's five lines
-of boilerplate wrapped in `#ifndef UNIT_TEST`.
+of boilerplate wrapped in `#ifndef NO_MAIN`.
 
 ## Ciphers
 
@@ -46,6 +47,15 @@ The ciphers in the `ciphers/` directory are (ordered alphabetically):
 | Substitution   | [docs/substitution-cipher.md](docs/substitution-cipher.md) |
 | Vigenere       | [docs/vigenere-cipher.md](docs/vigenere-cipher.md)         |
 
+## Attacks
+
+Cryptanalysis attacks against the ciphers above live in `attacks/`, built and
+tested the same way as `src/`:
+
+| Attack                     | Breaks                       | Docs                                                                       |
+| --------------------------- | ----------------------------- | --------------------------------------------------------------------------- |
+| Statistical shift attack   | [Shift](docs/shift-cipher.md) | [docs/statistical-shift-attack.md](docs/statistical-shift-attack.md)       |
+
 ## Adding a new cipher
 
 1. Write `src/<name>.c`. Give it one function named after the cipher —
@@ -53,7 +63,7 @@ The ciphers in the `ciphers/` directory are (ordered alphabetically):
    `void <name>_cipher(char *message, int decrypt)` if there's no key — that
    transforms `message` in place. This function *is* the cipher; don't put
    any other logic in the file.
-2. Wrap `main` in `#ifndef UNIT_TEST` (so tests can include the file and call
+2. Wrap `main` in `#ifndef NO_MAIN` (so tests can include the file and call
    the cipher function directly without a colliding `main`) and have it
    return `run_cipher(argc, argv, <name>_cipher)` (or `run_keyless_cipher` for
    the keyless case) from `utils/cli.c`. Copy it verbatim — it's boilerplate,
@@ -71,11 +81,28 @@ The ciphers in the `ciphers/` directory are (ordered alphabetically):
 No Makefile changes are needed — `make` picks up any `.c` file dropped into
 `src/` automatically.
 
+## Adding a new attack
+
+An attack lives in `attacks/<name>.c` and follows the same shape as a cipher,
+with two differences:
+
+1. It `#include`s the `src/<cipher>.c` it breaks, to call that cipher's
+   function directly (e.g. to decipher once it has recovered the key).
+   Compiling `attacks/*.c` always defines `NO_MAIN`, so the included cipher's
+   own `main` is left out.
+2. Its own `main` is wrapped in `#ifndef NO_ATTACK_MAIN` instead of
+   `#ifndef NO_MAIN` — that second guard is only turned on when its test
+   `#include`s it, so the attack's `main` doesn't collide with the test's.
+
+Otherwise it's the same as a cipher: one function doing the actual attack,
+a `docs/<name>.md`, and a `tests/<name>.c` — `make`, `make test`, and
+`make coverage` all pick it up automatically, no Makefile changes needed.
+
 ### Automated checks
 
 Every push and pull request runs two checks:
 
 - **Docs and tests must exist.**  
-  For every cipher source file, there must be a matching doc file and a matching test file.
+  For every cipher and attack source file, there must be a matching doc file and a matching test file.
 - **Tests must pass and hit 50% coverage.**  
   `make test` must succeed, and `make coverage` must report at least 50% line coverage for every file.

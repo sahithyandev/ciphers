@@ -37,7 +37,7 @@ void shift_cipher(char *message, const char *key, int decrypt) {
     }
 }
 
-#ifndef UNIT_TEST
+#ifndef NO_MAIN
 int main(int argc, char *argv[]) {
     return run_cipher(argc, argv, shift_cipher);
 }

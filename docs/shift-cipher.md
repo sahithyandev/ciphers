@@ -29,4 +29,4 @@ Attack at dawn
 ## Weaknesses
 
 Only 26 possible keys, so it's trivially broken by brute force or frequency
-analysis.
+analysis. See [statistical-shift-attack](statistical-shift-attack.md).
