@@ -22,11 +22,20 @@ all: $(BINS)
 $(BIN_DIR)/%: $(SRC_DIR)/%.c | $(BIN_DIR)
 	$(CC) $(CFLAGS) $< -o $@
 
+# Attacks #include a cipher's source to reuse its function, so -DNO_MAIN
+# suppresses that cipher's main() while keeping the attack's own.
+$(BIN_DIR)/%: $(ATTACK_DIR)/%.c | $(BIN_DIR)
+	$(CC) $(CFLAGS) -DNO_MAIN $< -o $@
+
 $(BIN_DIR)/tests/%: $(TEST_DIR)/%.c $(SRC_DIR)/%.c | $(BIN_DIR)/tests
 	$(CC) $(CFLAGS) -DNO_MAIN $< -o $@
 
 $(BIN_DIR)/tests/%: $(TEST_DIR)/%.c $(UTILS_DIR)/%.c | $(BIN_DIR)/tests
 	$(CC) $(CFLAGS) -DNO_MAIN $< -o $@
+
+# Also suppress the attack's own main(), since this file's main() is the test.
+$(BIN_DIR)/tests/%: $(TEST_DIR)/%.c $(ATTACK_DIR)/%.c | $(BIN_DIR)/tests
+	$(CC) $(CFLAGS) -DNO_MAIN -DNO_ATTACK_MAIN $< -o $@
 
 $(BIN_DIR) $(BIN_DIR)/tests:
 	mkdir -p $@
@@ -49,7 +58,7 @@ coverage: CFLAGS += -fprofile-instr-generate -fcoverage-mapping
 coverage: clean $(TEST_BINS)
 	@for t in $(TEST_BINS); do LLVM_PROFILE_FILE=$$t.profraw ./$$t; done
 	@$(LLVM_PREFIX)llvm-profdata merge -sparse $(BIN_DIR)/tests/*.profraw -o $(BIN_DIR)/tests/all.profdata
-	@$(LLVM_PREFIX)llvm-cov report $(firstword $(TEST_BINS)) $(addprefix -object ,$(wordlist 2,$(words $(TEST_BINS)),$(TEST_BINS))) -instr-profile=$(BIN_DIR)/tests/all.profdata $(SRC_DIR)/ $(UTILS_DIR)/
+	@$(LLVM_PREFIX)llvm-cov report $(firstword $(TEST_BINS)) $(addprefix -object ,$(wordlist 2,$(words $(TEST_BINS)),$(TEST_BINS))) -instr-profile=$(BIN_DIR)/tests/all.profdata $(SRC_DIR)/ $(UTILS_DIR)/ $(ATTACK_DIR)/
 	@echo "Detail: $(LLVM_PREFIX)llvm-cov show <bin> -instr-profile=$(BIN_DIR)/tests/all.profdata"
 
 clean:
@@ -66,7 +75,7 @@ endif
 	done
 	@title=$$(echo $(NAME) | awk -F- '{for(i=1;i<=NF;i++)$$i=toupper(substr($$i,1,1)) substr($$i,2); print}' OFS=' '); \
 	fn=$$(echo $(NAME) | tr - _)_cipher; \
-	printf '// Docs: docs/$(NAME)-cipher.md\n#include "../utils/cli.c"\n\n// The whole cipher: transform message in place. Delete the (void)decrypt\n// and take a "const char *key" param too if this cipher needs one.\nvoid %s(char *message, int decrypt) {\n    (void)message;\n    (void)decrypt;\n}\n\n#ifndef UNIT_TEST\nint main(int argc, char *argv[]) {\n    return run_keyless_cipher(argc, argv, %s);\n}\n#endif\n' "$$fn" "$$fn" > $(SRC_DIR)/$(NAME)-cipher.c; \
+	printf '// Docs: docs/$(NAME)-cipher.md\n#include "../utils/cli.c"\n\n// The whole cipher: transform message in place. Delete the (void)decrypt\n// and take a "const char *key" param too if this cipher needs one.\nvoid %s(char *message, int decrypt) {\n    (void)message;\n    (void)decrypt;\n}\n\n#ifndef NO_MAIN\nint main(int argc, char *argv[]) {\n    return run_keyless_cipher(argc, argv, %s);\n}\n#endif\n' "$$fn" "$$fn" > $(SRC_DIR)/$(NAME)-cipher.c; \
 	printf '# %s\n\nTODO: describe the cipher.\n\nSource: [`src/$(NAME)-cipher.c`](../src/$(NAME)-cipher.c)\n\n## Usage\n\n```\nbin/$(NAME)-cipher [-d] <args...>\n```\n\n## Examples\n\n```\n$$ bin/$(NAME)-cipher ...\n```\n\n## Weaknesses\n\nTODO.\n' "$$title" > $(DOCS_DIR)/$(NAME)-cipher.md; \
 	printf '// Tests for src/$(NAME)-cipher.c, run via `make test`.\n#include <string.h>\n#include "test.h"\n#include "../src/$(NAME)-cipher.c"\n\nint main(void) {\n    TEST_INIT();\n\n    // TODO: add tests, e.g.:\n    // char msg[] = "...";\n    // %s(msg, 0);\n    // CHECK(strcmp(msg, "...") == 0);\n\n    return TEST_SUMMARY();\n}\n' "$$fn" > $(TEST_DIR)/$(NAME)-cipher.c; \
 	echo "created $(SRC_DIR)/$(NAME)-cipher.c $(DOCS_DIR)/$(NAME)-cipher.md $(TEST_DIR)/$(NAME)-cipher.c"
