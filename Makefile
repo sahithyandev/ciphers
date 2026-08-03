@@ -4,12 +4,15 @@ LLVM_PREFIX := $(if $(shell command -v xcrun 2>/dev/null),xcrun )
 
 SRC_DIR = src
 UTILS_DIR = utils
+ATTACK_DIR = attacks
 BIN_DIR = bin
 
 TEST_DIR = tests
 
 SRCS = $(wildcard $(SRC_DIR)/*.c)
-BINS = $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%,$(SRCS))
+ATTACK_SRCS = $(wildcard $(ATTACK_DIR)/*.c)
+BINS = $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%,$(SRCS)) \
+       $(patsubst $(ATTACK_DIR)/%.c,$(BIN_DIR)/%,$(ATTACK_SRCS))
 
 TEST_SRCS = $(wildcard $(TEST_DIR)/*.c)
 TEST_BINS = $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/tests/%,$(TEST_SRCS))
