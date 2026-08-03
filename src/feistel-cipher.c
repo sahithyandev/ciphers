@@ -133,7 +133,7 @@ static long base64_decode(const char *b64, unsigned char *out) {
     return (long)o;
 }
 
-#ifndef UNIT_TEST
+#ifndef NO_MAIN
 // Ciphertext is arbitrary bytes, so it's printed/read as base64 rather than
 // mutating the message argv in place like the other ciphers do.
 int main(int argc, char *argv[]) {

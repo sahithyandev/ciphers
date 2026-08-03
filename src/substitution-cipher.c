@@ -69,7 +69,7 @@ void substitution_cipher(char *message, const char *key_str, int decrypt) {
     }
 }
 
-#ifndef UNIT_TEST
+#ifndef NO_MAIN
 int main(int argc, char *argv[]) {
     return run_cipher(argc, argv, substitution_cipher);
 }

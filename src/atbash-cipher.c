@@ -15,7 +15,7 @@ void atbash_cipher(char *message, int decrypt) {
     }
 }
 
-#ifndef UNIT_TEST
+#ifndef NO_MAIN
 int main(int argc, char *argv[]) {
     return run_keyless_cipher(argc, argv, atbash_cipher);
 }

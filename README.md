@@ -32,7 +32,7 @@ Each `src/<name>.c` becomes `bin/<name>` — no Makefile changes needed when add
 Tests live in `tests/<name>.c`, one per cipher, and `#include` the matching
 `src/<name>.c` directly so they can call its cipher function without a header
 split. `main` itself is untested (and untestable-by-design): it's five lines
-of boilerplate wrapped in `#ifndef UNIT_TEST`.
+of boilerplate wrapped in `#ifndef NO_MAIN`.
 
 ## Ciphers
 

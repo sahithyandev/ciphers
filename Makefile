@@ -20,10 +20,10 @@ $(BIN_DIR)/%: $(SRC_DIR)/%.c | $(BIN_DIR)
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/tests/%: $(TEST_DIR)/%.c $(SRC_DIR)/%.c | $(BIN_DIR)/tests
-	$(CC) $(CFLAGS) -DUNIT_TEST $< -o $@
+	$(CC) $(CFLAGS) -DNO_MAIN $< -o $@
 
 $(BIN_DIR)/tests/%: $(TEST_DIR)/%.c $(UTILS_DIR)/%.c | $(BIN_DIR)/tests
-	$(CC) $(CFLAGS) -DUNIT_TEST $< -o $@
+	$(CC) $(CFLAGS) -DNO_MAIN $< -o $@
 
 $(BIN_DIR) $(BIN_DIR)/tests:
 	mkdir -p $@
