@@ -43,6 +43,17 @@ int main(void) {
         CHECK(key == 0);
     }
     {
+        // '[' and '{' sit just past 'Z' and 'z' in ASCII: exercises the
+        // is-letter short-circuit false branch that a plain space doesn't reach.
+        char key9[] = "9";
+        char msg[] = "The quick {brown} fox [jumps] over the lazy dog and runs away";
+        char expect[] = "The quick {brown} fox [jumps] over the lazy dog and runs away";
+        shift_cipher(msg, key9, 0);
+        int key = statistical_shift_attack(msg);
+        CHECK(key == 9);
+        CHECK(strcmp(msg, expect) == 0);
+    }
+    {
         // Case and non-letters are preserved through the recovered plaintext.
         // (Needs a longer message than "Hello, World!" for the letter
         // histogram to reliably favor the right key.)

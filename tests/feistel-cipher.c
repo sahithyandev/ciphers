@@ -49,6 +49,39 @@ int main(void) {
         CHECK(base64_decode("abc", out) == -1);   // length not a multiple of 4
         CHECK(base64_decode("!!!!", out) == -1);  // non-base64 characters
     }
+    {
+        // two leftover bytes after the last full 3-byte group
+        unsigned char bytes[] = {0xBD, 0xEF};
+        char b64[5];
+        base64_encode(bytes, 2, b64);
+        CHECK(strcmp(b64, "ve8=") == 0);
+    }
+    {
+        // no leftover bytes: length is an exact multiple of 3
+        unsigned char bytes[] = {0xBD, 0xEF, 0x00};
+        char b64[5];
+        base64_encode(bytes, 3, b64);
+        CHECK(strcmp(b64, "ve8A") == 0);
+    }
+    {
+        // '+' and '/' round out the base64 alphabet; '{' and ':' are just
+        // past the lowercase/digit ranges and should be rejected
+        CHECK(base64_value('+') == 62);
+        CHECK(base64_value('/') == 63);
+        CHECK(base64_value('{') == -1);
+        CHECK(base64_value(':') == -1);
+    }
+    {
+        // malformed padding: a non-'=' char where the pad marker (from the
+        // trailing '=') says one should be
+        unsigned char out[4];
+        CHECK(base64_decode("ab=a", out) == -1);
+    }
+    {
+        // empty input
+        unsigned char out[1];
+        CHECK(base64_decode("", out) == 0);
+    }
 
     return TEST_SUMMARY();
 }
