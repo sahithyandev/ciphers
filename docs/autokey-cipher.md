@@ -43,4 +43,5 @@ ciphertext at every offset, and decrypt with it as if it were the key at that po
 Most offsets produce gibberish, but the correct offset produces a readable
 fragment both in the plaintext and, shifted right by the primer's length,
 in the key itself, which reveals more of the primer and cascades into
-recovering the rest of the message.
+recovering the rest of the message. See
+[autokey-crib-attack](autokey-crib-attack.md).

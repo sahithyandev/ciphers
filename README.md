@@ -53,9 +53,10 @@ The ciphers in the `ciphers/` directory are (ordered alphabetically):
 Cryptanalysis attacks against the ciphers above live in `attacks/`, built and
 tested the same way as `src/`:
 
-| Attack                     | Breaks                       | Docs                                                                       |
-| --------------------------- | ----------------------------- | --------------------------------------------------------------------------- |
-| Statistical shift attack   | [Shift](docs/shift-cipher.md) | [docs/statistical-shift-attack.md](docs/statistical-shift-attack.md)       |
+| Attack                     | Breaks                             | Docs                                                                       |
+| --------------------------- | ------------------------------------ | --------------------------------------------------------------------------- |
+| Statistical shift attack   | [Shift](docs/shift-cipher.md)       | [docs/statistical-shift-attack.md](docs/statistical-shift-attack.md)       |
+| Autokey crib attack        | [Autokey](docs/autokey-cipher.md)   | [docs/autokey-crib-attack.md](docs/autokey-crib-attack.md)                 |
 
 ## Adding a new cipher
 
