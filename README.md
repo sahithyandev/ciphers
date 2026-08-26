@@ -42,6 +42,7 @@ The ciphers in the `ciphers/` directory are (ordered alphabetically):
 | Cipher         | Docs                                                       |
 | -------------- | ---------------------------------------------------------- |
 | Atbash         | [docs/atbash-cipher.md](docs/atbash-cipher.md)             |
+| Autokey        | [docs/autokey-cipher.md](docs/autokey-cipher.md)           |
 | Feistel        | [docs/feistel-cipher.md](docs/feistel-cipher.md)           |
 | Shift (Caesar) | [docs/shift-cipher.md](docs/shift-cipher.md)               |
 | Substitution   | [docs/substitution-cipher.md](docs/substitution-cipher.md) |
