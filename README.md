@@ -42,6 +42,7 @@ The ciphers in the `ciphers/` directory are (ordered alphabetically):
 | Cipher         | Docs                                                       |
 | -------------- | ---------------------------------------------------------- |
 | Atbash         | [docs/atbash-cipher.md](docs/atbash-cipher.md)             |
+| Autokey        | [docs/autokey-cipher.md](docs/autokey-cipher.md)           |
 | Feistel        | [docs/feistel-cipher.md](docs/feistel-cipher.md)           |
 | Shift (Caesar) | [docs/shift-cipher.md](docs/shift-cipher.md)               |
 | Substitution   | [docs/substitution-cipher.md](docs/substitution-cipher.md) |
@@ -52,9 +53,10 @@ The ciphers in the `ciphers/` directory are (ordered alphabetically):
 Cryptanalysis attacks against the ciphers above live in `attacks/`, built and
 tested the same way as `src/`:
 
-| Attack                     | Breaks                       | Docs                                                                       |
-| --------------------------- | ----------------------------- | --------------------------------------------------------------------------- |
-| Statistical shift attack   | [Shift](docs/shift-cipher.md) | [docs/statistical-shift-attack.md](docs/statistical-shift-attack.md)       |
+| Attack                     | Breaks                             | Docs                                                                       |
+| --------------------------- | ------------------------------------ | --------------------------------------------------------------------------- |
+| Statistical shift attack   | [Shift](docs/shift-cipher.md)       | [docs/statistical-shift-attack.md](docs/statistical-shift-attack.md)       |
+| Autokey crib attack        | [Autokey](docs/autokey-cipher.md)   | [docs/autokey-crib-attack.md](docs/autokey-crib-attack.md)                 |
 
 ## Adding a new cipher
 
